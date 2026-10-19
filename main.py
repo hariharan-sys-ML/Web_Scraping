@@ -1,17 +1,29 @@
 import requests
 from bs4 import BeautifulSoup
+import pandas as pd
 
-url = "https://books.toscrape.com/"
+book_list = []
+for page in range(0, 51):
+    if page == 1:
+        url = "https://books.toscrape.com/"
+    else:
+        url = f"https://books.toscrape.com/catalogue/page-{page}.html"
 
-response = requests.get(url, timeout=15)
-soup = BeautifulSoup(response.text, "html.parser")
+    response = requests.get(url, timeout=15)
+    soup = BeautifulSoup(response.text, "html.parser")
 
-book = soup.find("article", class_="product_pod")
+    books = soup.find_all("article", class_="product_pod")
 
-title = book.find("h3").find("a")["title"]
-Rating = book.find("p", class_="star-rating")["class"][1]
-price = book.find("p", class_="price_color").text.strip()
+    for i in books:
+        title = i.find("h3").find("a")["title"]
+        Rating = i.find("p", class_="star-rating")["class"][1]
+        price = i.find("p", class_="price_color").text.strip()
 
-print("Book title:", title)
-print("Price:", price)
-print("Rating:", Rating)
+        book_list2 = [title, Rating , price]
+        book_list.append(book_list2)
+
+df = pd.DataFrame(book_list, columns=["Title", "Rating", "Price"])
+df.to_csv("books.csv", index=False)
+
+
+
